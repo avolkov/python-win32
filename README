@@ -1,3 +1,4 @@
 Repository for python windows code snippets.
 
 read_failed_logins -- read failed login attempts and save them to a pickle file.
+OLK_cleanup -- cleanup outlook saved attachemets folder. Use it when outlook runs out of temporary file names.
