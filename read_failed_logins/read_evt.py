@@ -29,6 +29,31 @@ def read_faild_login_events():
 	for item in read_login_events(529,"Security"):
 		interesting_data.append(format_data(item, filter_interesting))
 	return interesting_data
+def read_successful_login_events():
+	def filter_interesting(input):
+		return input
+	interesting_data = []
+	for item in read_login_events(528,"Security"):
+		interesting_data.append(format_data(item, filter_interesting))
+	return interesting_data
+def read_logoff_events():
+	def filter_interesting(input):
+		return input
+	interesting_data = []
+	for item in read_login_events(551,"Security"):
+		interesting_data.append(format_data(item, filter_interesting))
+	return interesting_data
+
+def read_explicit_logon_events():
+	def filter_interesting(input):
+		"""
+		@output ['username', 'target username',  'target server', 'source ip', 'source port']
+		"""
+		return [input[0], input[5], input[9], input[11], input[12]]
+	interesting_data = []
+	for item in read_login_events(552,"Security"):
+		interesting_data.append(format_data(item, filter_interesting))
+	return interesting_data	
 
 def format_data(event_log_item, outer_filter):
 	interesting = outer_filter(safe_format_to_list(get_event_string(event_log_item)))
@@ -48,17 +73,31 @@ def safe_format_to_list(msg):
 			return [string.strip(x, "\"'()<> .,") for x in (msg.split(":")[1]).split(",")]
 		except IndexError:
 			return []
+def usage(arg):
+	if len(arg) > 0:
+		print >> sys.stderr, arg
+	print >> sys.stderr, "Usage: "+sys.argv[0]+" <pickle_save_filename> [failed_login, ok_login, exp_login, logoff] "
 if __name__ == "__main__":
-	if len(sys.argv) < 2:
-		print >> sys.stderr, "Usage: "+sys.argv[0]+" <pickle_save_filename>"
+	if len(sys.argv) < 3:
+		usage()
 		sys.exit(1)
 	if os.path.isfile(sys.argv[1]):
-		print >> sys.stderr, "File '"+sys.argv[1]+" exists! Not overwriting."
-		print >> sys.stderr, "Usage: "+sys.argv[0]+" <pickle_save_filename>"
+		usage("File '"+sys.argv[1]+" exists! Not overwriting.")
 		sys.exit(2)
 	
+	
+	if sys.argv[2] == "failed_login":
+		interesting_data =  read_faild_login_events()
+	elif sys.argv[2] == "ok_login":
+		interesting_data = read_successful_login_events()
+	elif sys.argv[2] == "exp_login":
+		interesting_data = read_explicit_logon_events()
+	elif sys.argv[2] == "logoff":
+		interesting_data = read_logoff_events()
+	else:
+		usage("Unknown option '"+sys.argv[2]+"'")
+		sys.exit(3)
 	output = open(sys.argv[1], 'wb')
-	interesting_data = read_faild_login_events()
 	#print interesting
 	pickle.dump(interesting_data, output, -1)
 	output.close()
