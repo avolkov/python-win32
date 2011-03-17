@@ -1,0 +1,3 @@
+Repository for python windows code snippets.
+
+read_failed_logins -- read failed login attempts and save them to a pickle file.

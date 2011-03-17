@@ -1,3 +1,4 @@
+**REQUIRES Active State Python
 read_env.py
 PURPOSE:
 	Read all failed login attempts from Windows Event Log (Event ID 529) and save them to a pickle file.
